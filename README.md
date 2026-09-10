@@ -4,6 +4,14 @@ Warning when a Dockerfile's FINAL build stage never sets a non-root
 `USER` -- Docker runs a container as root by default when `USER` is
 absent.
 
+## Screenshots
+
+![Screenshot 1](docs/screenshots/Screenshot_1.png)
+
+![Screenshot 2](docs/screenshots/Screenshot_2.png)
+
+![Screenshot 3](docs/screenshots/Screenshot_3.png)
+
 ## Why it exists
 
 A real risk documented explicitly by Docker's own guide for the
