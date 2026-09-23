@@ -1,0 +1,11 @@
+# Not flagged (since 0.2.0): the final stage builds on `base`, a
+# PREVIOUS named stage in this same file that already switched to a
+# non-root USER. Docker inherits that state, and so does this check.
+FROM node:20-slim AS base
+RUN useradd --create-home appuser
+USER appuser
+
+FROM base AS final
+WORKDIR /app
+COPY --chown=appuser:appuser . .
+CMD ["node", "index.js"]

@@ -112,6 +112,53 @@ class DockerfileUserScannerTest {
     }
 
     @Test
+    fun `does not flag when the final stage inherits a non-root USER from a named base stage it builds on`() {
+        val dockerfile = """
+            FROM node:20 AS base
+            RUN useradd -m appuser
+            USER appuser
+
+            FROM base AS final
+            COPY --chown=appuser:appuser . .
+            CMD ["node", "index.js"]
+        """.trimIndent()
+
+        assertTrue(DockerfileUserScanner.scan(dockerfile).isEmpty())
+    }
+
+    @Test
+    fun `flags when the final stage builds on a named stage that never set a non-root USER`() {
+        val dockerfile = """
+            FROM node:20 AS base
+            RUN echo "no user switch here"
+
+            FROM base AS final
+            CMD ["node", "index.js"]
+        """.trimIndent()
+
+        val hits = DockerfileUserScanner.scan(dockerfile)
+        assertEquals(1, hits.size)
+        assertEquals(dockerfile.lines().indexOfFirst { it.contains("AS final") } + 1, hits[0].anchorLineNumber)
+    }
+
+    @Test
+    fun `does not flag when the final stage builds on a chain of two named stages ending in non-root`() {
+        val dockerfile = """
+            FROM node:20 AS base
+            RUN useradd -m appuser
+            USER appuser
+
+            FROM base AS deps
+            RUN npm install
+
+            FROM deps AS final
+            CMD ["node", "index.js"]
+        """.trimIndent()
+
+        assertTrue(DockerfileUserScanner.scan(dockerfile).isEmpty())
+    }
+
+    @Test
     fun `returns empty for a file with no FROM at all`() {
         assertTrue(DockerfileUserScanner.scan("# just a comment\nUSER appuser\n").isEmpty())
     }
