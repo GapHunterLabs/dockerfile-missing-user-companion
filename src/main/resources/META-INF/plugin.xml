@@ -11,19 +11,22 @@
         escape/privilege escalation if a volume mount is
         misconfigured).</p>
         <p><b>Reasons over real multi-stage structure</b> -- a
-        <code>USER</code> instruction in an EARLIER stage never counts;
-        only the file's last <code>FROM</code> (the stage a plain
+        <code>USER</code> instruction in an EARLIER stage never counts on
+        its own; only the file's last <code>FROM</code> (the stage a plain
         <code>docker build</code> with no <code>--target</code> actually
-        runs) is checked. Confirmed with the strongest evidence
-        available: an open issue in hadolint's own repository
-        (<code>hadolint/hadolint#1089</code>) asking for exactly this
-        rule, unresolved -- not even the standard Dockerfile CLI linter
-        has it implemented yet.</p>
-        <p>Stated honestly: v0.1 only detects total absence of a
-        non-root <code>USER</code> in the final stage -- never validates
-        that the referenced user actually exists (<code>USER appuser</code>
-        with no prior <code>RUN useradd appuser</code> is a different
-        problem, out of scope here).</p>
+        runs) is checked. When that last stage builds on a PREVIOUS named
+        stage from the same file (<code>FROM base AS final</code>, not an
+        external image), the check follows Docker's own inheritance and
+        picks up whatever <code>USER</code> that stage chain last set.
+        Confirmed with the strongest evidence available: an open issue in
+        hadolint's own repository (<code>hadolint/hadolint#1089</code>,
+        still open as of 2026-09) asking for exactly this rule -- not even
+        the standard Dockerfile CLI linter has it implemented yet.</p>
+        <p>Stated honestly: never validates that the referenced user
+        actually exists (<code>USER appuser</code> with no prior
+        <code>RUN useradd appuser</code> is a different problem, out of
+        scope here), and a <code>USER</code> instruction split across
+        lines with a trailing <code>\</code> is not recognized.</p>
         <p>Free. No license nags, no telemetry, no network calls.</p>
     ]]></description>
 
