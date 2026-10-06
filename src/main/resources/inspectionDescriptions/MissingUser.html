@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports a Dockerfile whose final build stage never switches to a non-root <code>USER</code>.
+<!-- tooltip end -->
+<p>Without a <code>USER</code> instruction the container runs as root, which turns a misconfigured mount or an
+escape bug into full privileges. Only the last <code>FROM</code> (the stage a plain <code>docker build</code> runs) is
+checked, and when it builds on an earlier stage of the same file, the <code>USER</code> inherited from that stage
+counts.</p>
+</body>
+</html>
